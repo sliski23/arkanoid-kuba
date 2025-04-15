@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obracające się koło</title>
+    <style>
+        body {
+            background:gray ;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 1px solid blue;
+            background: white;
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+		
+    </style>
+</head>
+<body>
+		
+    <button onclick="startGame()">Start</button>
+    <canvas id="canvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let pos = { x: 100, y: 100 };
+        let speed = { x: 5, y: 5 }; 
+        let platform = { x: 150, y: 450, width: 100, height: 10 };
+        let platformSpeed = 20;
+        let gameOver = false; 
+        let gameStarted = false;
+
+        function startGame() {
+            document.querySelector("button").style.display = "none";
+            canvas.style.display = "block";
+            gameStarted = true;
+            draw();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft" && platform.x > 0) {
+                platform.x -= platformSpeed;
+            } else if (event.key === "ArrowRight" && platform.x + platform.width < canvas.width) {
+                platform.x += platformSpeed;
+            }
+        });
+
+        function draw() {
+            if (!gameStarted) return;
+
+            if (gameOver) {
+                setTimeout(() => {
+                    alert("Game Over!Aby rozpocząc grę od nowa klknij ok");
+                    document.location.reload();
+                }, 100);
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "blue";
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+
+            pos.x += speed.x;
+            pos.y += speed.y;
+
+            if (pos.x + 15 >= canvas.width || pos.x - 15 <= 0) {
+                speed.x = -speed.x; 
+            }
+            if (pos.y - 15 <= 0) {
+                speed.y = -speed.y; 
+            }
+
+            if (
+                pos.y + 15 >= platform.y && 
+                pos.x >= platform.x && 
+                pos.x <= platform.x + platform.width
+            ) {
+                speed.y = -speed.y; 
+                pos.y = platform.y - 50; 
+            }
+
+            if (pos.y - 20 > canvas.height) {
+                gameOver = true;
+            }
+
+            requestAnimationFrame(draw);
+        }
+    </script>
+
+</body>
+</html>
